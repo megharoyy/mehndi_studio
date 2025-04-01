@@ -1,44 +1,6 @@
 <?php
-$artistMessage = '';
-$designMessage = '';
-
-// Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['addArtist'])) {
-        // Retrieve form data
-        $artistName = $_POST['artistName'];
-        $artistSpecialty = $_POST['artistSpecialty'];
-        $artistExperience = $_POST['artistExperience']; // Added experience
-        $artistContact = $_POST['artistContact']; // Assuming you want to keep this for future use
-        $artistImageUrl = ''; // Placeholder for image URL
-        if (isset($_FILES['artistImage']) && $_FILES['artistImage']['error'] === UPLOAD_ERR_OK) {
-            $designImage = $_FILES['artistImage']['name'];
-            // Move the uploaded file to a designated directory (e.g., 'uploads/')
-            move_uploaded_file($_FILES['designImage']['tmp_name'], 'uploads/' . $designImage);
-            $designMessage = "Design '$designName' added successfully!";
-        } else {
-            $designMessage = "Failed to upload design image.";
-        }
-        // Here you would typically save the artist data to a database
-        // For demonstration, we'll just set a success message
-        $artistMessage = "Artist '$artistName' added successfully!";
-    } elseif (isset($_POST['addDesign'])) {
-        // Handle design form submission
-        $designName = $_POST['designName'];
-        $designDescription = $_POST['designDescription'];
-
-        if (isset($_FILES['designImage']) && $_FILES['designImage']['error'] === UPLOAD_ERR_OK) {
-            $designImage = $_FILES['designImage']['name'];
-            // Move the uploaded file to a designated directory (e.g., 'uploads/')
-            move_uploaded_file($_FILES['designImage']['tmp_name'], 'uploads/' . $designImage);
-            $designMessage = "Design '$designName' added successfully!";
-        } else {
-            $designMessage = "Failed to upload design image.";
-        }
-    }
-}
+include '../includes/admin_logic.php'
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -163,8 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <div class="sidebar
-        <div class="sidebar">
+    <div class="sidebar">
         <h2>Admin Dashboard</h2>
         <ul class="sidebar-nav">
             <li onclick="showSection('appointments')">Appointments</li>
@@ -177,6 +138,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Appointments Section -->
         <div id="appointments" class="section active">
             <h2>Appointments</h2>
+            <?php if (isset($bookingMessage)): ?>
+                <center>
+                    <p><b><?php echo $bookingMessage; ?></b></p>
+                </center>
+            <?php endif; ?>
             <table>
                 <thead>
                     <tr>
@@ -184,18 +150,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th>Date</th>
                         <th>Time</th>
                         <th>Artist</th>
-                        <th>Design</th>
+                        <th>Design Type</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>John Doe</td>
-                        <td>2023-08-15</td>
-                        <td>14:30</td>
-                        <td>Artist 1</td>
-                        <td>Dragon Design</td>
-                    </tr>
-                    <!-- Add more rows dynamically -->
+                    <?php if (!empty($bookings)): ?>
+                        <?php foreach ($bookings as $booking): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($booking['full_name']); ?></td>
+                                <td><?php echo htmlspecialchars($booking['appointment_date']); ?></td>
+                                <td><?php echo htmlspecialchars($booking['appointment_time']); ?></td>
+                                <td><?php echo htmlspecialchars($booking['artist_name']); ?></td>
+                                <td><?php echo htmlspecialchars($booking['design_type']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5">No appointments found.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -203,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Add Artist Section -->
         <div id="addArtist" class="section">
             <h2>Add New Artist</h2>
-            <form id="artistForm" method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="artistName">Artist Name:</label>
                     <input type="text" id="artistName" name="artistName" required>
@@ -213,16 +186,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" id="artistSpecialty" name="artistSpecialty" required>
                 </div>
                 <div class="form-group">
-                    <label for="artistExperience">Experience:</label>
-                    <input type="text" id="artistExperience" name="artistExperience" required>
+                    <label for="artistExperience">Experience (in years):</label>
+                    <input type="number" id="artistExperience" name="artistExperience" min="0" required>
                 </div>
                 <div class="form-group">
-                    <label for="artistContact">Contact Information:</label>
-                    <input type="text" id="artistContact" name="artistContact" required>
+                    <label for="artistContact">Contact Information (10 digits):</label>
+                    <input type="tel" id="artistContact" name="artistContact" pattern="\d{10}" required>
+                    <small>Format: 1234567890</small>
+                </div>
+                <div class="form-group">
+                    <label for="artistImage">Artist Image:</label>
+                    <input type="file" id="artistImage" name="artistImage" accept="image/*" required>
                 </div>
                 <button type="submit" name="addArtist">Add Artist</button>
             </form>
             <?php if ($artistMessage): ?>
+                <br>
                 <p><?php echo $artistMessage; ?></p>
             <?php endif; ?>
         </div>
@@ -230,14 +209,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Add Design Section -->
         <div id="addDesign" class="section">
             <h2>Add New Design</h2>
-            <form id="designForm" method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="designName">Design Name:</label>
                     <input type="text" id="designName" name="designName" required>
                 </div>
                 <div class="form-group">
+                    <label for="designType">Design Type:</label>
+                    <select name="design_type" required>
+                        <option value="" selected disabled>Design Type</option>
+                        <option value="Bridal">Bridal</option>
+                        <option value="Arabic">Arabic</option>
+                        <option value="Traditional">Traditional</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="designImage">Design Image:</label>
-                    <input type="file" id="designImage" name="designImage" accept="image/png, image/jpeg" required>
+                    <input type="file" id="designImage" name="designImage" accept="image/*" required>
                 </div>
                 <div class="form-group">
                     <label for="designDescription">Description:</label>
@@ -246,6 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" name="addDesign">Add Design</button>
             </form>
             <?php if ($designMessage): ?>
+                <br>
                 <p><?php echo $designMessage; ?></p>
             <?php endif; ?>
         </div>
@@ -257,11 +246,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
-
             // Show selected section
             document.getElementById(sectionId).classList.add('active');
         }
-
         // Initialize the default section
         showSection('appointments');
     </script>
