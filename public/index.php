@@ -1,19 +1,5 @@
 <?php
-include "config.php";
-
-
-// Fetch artists from the database
-$artists = [];
-$stmt=$conn->prepare("SELECT*FROM artist");
-$stmt->execute();
-$artists = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch designs from the database
-$designs = [];
-$stmt = $conn->prepare("SELECT * FROM design");
-$stmt->execute();
-$designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+include '../includes/index_logic.php'
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +15,7 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             margin: 0;
             padding: 0;
         }
+
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f5e6f1;
@@ -85,7 +72,9 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             margin: 0 auto;
         }
 
-        input, select, button {
+        input,
+        select,
+        button {
             padding: 10px;
             border: 1px solid #add;
             border-radius: 5px;
@@ -132,7 +121,7 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: transform 0.3s;
         }
 
-       .design-card:hover img {
+        .design-card:hover img {
             transform: scale(1.1);
         }
     </style>
@@ -149,24 +138,23 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="tab" onclick="showSection('artists')">Our Artists</div>
             <div class="tab" onclick="showSection('gallery')">Design Gallery</div>
         </div>
-
         <div id="booking" class="content-section action active">
             <h2>Booking Your Appointment</h2>
-            <form class="booking-form" method="POST" action="book.php">
+            <form class="booking-form" method="POST">
                 <input type="text" name="full_name" placeholder="Full Name" required>
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="date" name="date" required>
                 <input type="time" name="time" required>
 
                 <select name="artist" required>
-                    <option value="">Select Artist</option>
+                    <option value="" selected disabled>Select Artist</option>
                     <?php foreach ($artists as $artist): ?>
-                        <option value="<?= htmlspecialchars($artist['name']) ?>"><?= htmlspecialchars($artist['name']) ?></option>
+                        <option value="<?= htmlspecialchars($artist['artist_id']) ?>"><?= htmlspecialchars($artist['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
 
                 <select name="design_type" required>
-                    <option value="">Design Type</option>
+                    <option value="" selected disabled>Design Type</option>
                     <option value="Bridal">Bridal</option>
                     <option value="Arabic">Arabic</option>
                     <option value="Traditional">Traditional</option>
@@ -179,8 +167,8 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div id="artists" class="content-section">
             <h2>Our Talented Artists</h2>
             <div id="artist-container">
-                <?php foreach ($artists as $artist): 
-                       ?>
+                <?php foreach ($artists as $artist):
+                ?>
                     <div class="artist-card">
                         <img src="<?= htmlspecialchars($artist['image_url']) ?>" class="artist-image" alt="<?= htmlspecialchars($artist['name']) ?>">
                         <div>
@@ -194,11 +182,15 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div id="gallery" class="content-section">
-            <h2>Design Gallery</h2>
+            <h2>Design Gallery</h2><br>
             <div class="design-gallery" id="gallery-container">
                 <?php foreach ($designs as $design): ?>
                     <div class="design-card">
-                        <img src="<?= htmlspecialchars($design['image_url']) ?>" alt="Mehndi Design">
+                        <center>
+                            <h3><?= htmlspecialchars($design['name']) ?></h3>
+                        </center>
+                        <img src="<?= htmlspecialchars($design['image_url']) ?>" id="mehndi_img" alt="Mehndi Design">
+                        <p> <?= htmlspecialchars($design['description']) ?></p>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -219,4 +211,5 @@ $designs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </script>
 </body>
+
 </html>
