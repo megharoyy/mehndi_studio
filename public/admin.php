@@ -1,6 +1,8 @@
 <?php
-include '../includes/admin_logic.php'
+include '../includes/admin_logic.php';
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -121,6 +123,15 @@ include '../includes/admin_logic.php'
         button:hover {
             background-color: #2980b9;
         }
+
+        .delete-button {
+            background-color: #e74c3c;
+            margin-left: 10px;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 
@@ -131,6 +142,8 @@ include '../includes/admin_logic.php'
             <li onclick="showSection('appointments')">Appointments</li>
             <li onclick="showSection('addArtist')">Add Artist</li>
             <li onclick="showSection('addDesign')">Add Design</li>
+            <li onclick="showSection('artists')">Our Artists</li>
+            <li onclick="showSection('designs')">Designs</li>
         </ul>
     </div>
 
@@ -151,6 +164,7 @@ include '../includes/admin_logic.php'
                         <th>Time</th>
                         <th>Artist</th>
                         <th>Design Type</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -160,13 +174,32 @@ include '../includes/admin_logic.php'
                                 <td><?php echo htmlspecialchars($booking['full_name']); ?></td>
                                 <td><?php echo htmlspecialchars($booking['appointment_date']); ?></td>
                                 <td><?php echo htmlspecialchars($booking['appointment_time']); ?></td>
-                                <td><?php echo htmlspecialchars($booking['artist_name']); ?></td>
+                                <td><?php 
+$artist_id = $booking['artist_id']; // Assuming $booking is an associative array with 'artist_id'
+$query = "SELECT name FROM artists WHERE artist_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $artist_id); // Assuming artist_id is an integer
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $artist = $result->fetch_assoc();
+    $artist_name = $artist['name'];
+} else {
+    $artist_name = "Unknown Artist"; // Handle case where artist is not found
+}echo $artist_name; ?></td>
                                 <td><?php echo htmlspecialchars($booking['design_type']); ?></td>
+                                <td>
+                                    <form method="POST" style="display:inline;">
+                                        <input type="hidden" name="booking_id" value="<?php echo htmlspecialchars($booking['booking_id']); ?>">
+                                        <button type="submit" name="deleteBooking" class="delete-button">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5">No appointments found.</td>
+                            <td colspan="6">No appointments found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -206,6 +239,44 @@ include '../includes/admin_logic.php'
             <?php endif; ?>
         </div>
 
+        <!-- Our Artists Section -->
+        <div id="artists" class="section">
+            <h2>Our Artists</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Artist Name</th>
+                        <th>Specialty</th>
+                        <th>Experience</th>
+                        <th>Contact</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($artists)): ?>
+                        <?php foreach ($artists as $artist): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($artist['name']); ?></td>
+                                <td><?php echo htmlspecialchars($artist['specialty']); ?></td>
+                                <td><?php echo htmlspecialchars($artist['experience']); ?> years</td>
+                                <td><?php echo htmlspecialchars($artist['contact']); ?></td>
+                                <td>
+                                    <form method="POST" style="display:inline;">
+                                        <input type="hidden" name="artist_id" value="<?php echo htmlspecialchars($artist['artist_id']); ?>">
+                                        <button type="submit" name="deleteArtist" class="delete-button">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5">No artists found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
         <!-- Add Design Section -->
         <div id="addDesign" class="section">
             <h2>Add New Design</h2>
@@ -237,6 +308,42 @@ include '../includes/admin_logic.php'
                 <br>
                 <p><?php echo $designMessage; ?></p>
             <?php endif; ?>
+        </div>
+
+        <!-- Designs Section -->
+        <div id="designs" class="section">
+            <h2>Designs</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Design Name</th>
+                        <th>Design Type</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($designs)): ?>
+                        <?php foreach ($designs as $design): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($design['name']); ?></td>
+                                <td><?php echo htmlspecialchars($design['design_type']); ?></td>
+                                <td><?php echo htmlspecialchars($design['description']); ?></td>
+                                <td>
+                                    <form method="POST" style="display:inline;">
+                                        <input type="hidden" name="design_id" value="<?php echo htmlspecialchars($design['design_id']); ?>">
+                                        <button type="submit" name="deleteDesign" class="delete-button">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="4">No designs found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 

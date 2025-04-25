@@ -1,9 +1,5 @@
 <?php
-<<<<<<< HEAD
-include '../includes/index_logic.php';
-=======
 include '../includes/index_logic.php'
->>>>>>> 8ab1bb3a2743672ca65d37f9948fcaa29ba62ced
 ?>
 
 <!DOCTYPE html>
@@ -86,13 +82,8 @@ include '../includes/index_logic.php'
         input,
         select,
         button {
-<<<<<<< HEAD
-            padding: 12px;
-            border: 1px solid #ccc;
-=======
             padding: 10px;
             border: 1px solid #add;
->>>>>>> 8ab1bb3a2743672ca65d37f9948fcaa29ba62ced
             border-radius: 5px;
             transition: border-color 0.3s;
         }
@@ -154,23 +145,8 @@ include '../includes/index_logic.php'
             transition: transform 0.3s;
         }
 
-<<<<<<< HEAD
-        .design-card:hover {
-            transform: scale(1.05);
-        }
-
-        .design-card h3 {
-            text-align: center;
-            margin: 10px 0;
-        }
-
-        .design-card p {
-            padding: 0 10px;
-            text-align: center;
-=======
         .design-card:hover img {
             transform: scale(1.1);
->>>>>>> 8ab1bb3a2743672ca65d37f9948fcaa29ba62ced
         }
     </style>
 </head>
@@ -185,11 +161,7 @@ include '../includes/index_logic.php'
             <div class="tab action" onclick="showSection('booking')">Booking Appointment</div>
             <div class="tab" onclick="showSection('artists')">Our Artists</div>
             <div class="tab" onclick="showSection('gallery')">Design Gallery</div>
-        </div>
-<<<<<<< HEAD
-        
-=======
->>>>>>> 8ab1bb3a2743672ca65d37f9948fcaa29ba62ced
+     </div>
         <div id="booking" class="content-section action active">
             <h2>Booking Your Appointment</h2>
             <form class="booking-form" method="POST">
@@ -219,12 +191,8 @@ include '../includes/index_logic.php'
         <div id="artists" class="content-section">
             <h2>Our Talented Artists</h2>
             <div id="artist-container">
-<<<<<<< HEAD
-                <?php foreach ($artists as $artist): ?>
-=======
                 <?php foreach ($artists as $artist):
                 ?>
->>>>>>> 8ab1bb3a2743672ca65d37f9948fcaa29ba62ced
                     <div class="artist-card">
                         <img src="<?= htmlspecialchars($artist['image_url']) ?>" class="artist-image" alt="<?= htmlspecialchars($artist['name']) ?>">
                         <div>
@@ -242,17 +210,11 @@ include '../includes/index_logic.php'
             <div class="design-gallery" id="gallery-container">
                 <?php foreach ($designs as $design): ?>
                     <div class="design-card">
-<<<<<<< HEAD
-                        <h3><?= htmlspecialchars($design['name']) ?></h3>
-                        <img src="<?= htmlspecialchars($design['image_url']) ?>" alt="Mehndi Design">
-                        <p><?= htmlspecialchars($design['description']) ?></p>
-=======
                         <center>
                             <h3><?= htmlspecialchars($design['name']) ?></h3>
                         </center>
                         <img src="<?= htmlspecialchars($design['image_url']) ?>" id="mehndi_img" alt="Mehndi Design">
                         <p> <?= htmlspecialchars($design['description']) ?></p>
->>>>>>> 8ab1bb3a2743672ca65d37f9948fcaa29ba62ced
                     </div>
                 <?php endforeach; ?>
             </div>

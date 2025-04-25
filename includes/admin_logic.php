@@ -94,6 +94,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteBooking'])) {
+    // Get the booking ID from the form
+    $booking_id = $_POST['booking_id'];
+    $query= "DELETE FROM bookings WHERE booking_id = ?";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $booking_id); // Assuming artist_id is an integer
+    if ($stmt->execute()) {
+        echo "Booking deleted successfully.";
+    } else {
+        echo "Error deleting booking.";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteArtist'])) {
+ 
+    $artist_id = $_POST['artist_id'];
+    $query= "DELETE FROM artists WHERE artist_id = ?";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $artist_id); // Assuming artist_id is an integer
+    if ($stmt->execute()) {
+        echo "Artist deleted successfully.";
+    } else {
+        echo "Error deleting Artist.";
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteDesign'])) {
+   
+    $design_id = $_POST['design_id'];
+    $query= "DELETE FROM designs WHERE design_id = ?";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $design_id); // Assuming design_id is an integer
+    if ($stmt->execute()) {
+        echo "design deleted successfully.";
+    } else {
+        echo "Error deleting design.";
+    }
+}
+
+
 $bookings = [];
 $query = "
     SELECT 
@@ -110,8 +153,31 @@ $query = "
 ";
 $result = $conn->query($query);
 
+$artists = [];
+$query = "SELECT * FROM artists";
+$result = $conn->query($query);
+if ($result) {
+    $artists = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $artistMessage = "Error fetching artists: " . $conn->error;
+}
+
+$bookings = [];
+$query = "SELECT * FROM bookings";
+$result = $conn->query($query);
+
 if ($result) {
     $bookings = $result->fetch_all(MYSQLI_ASSOC);
 } else {
     $bookingMessage = "Error fetching bookings: " . $conn->error;
+}
+
+$designs = [];
+$query = "SELECT * FROM designs";
+$result = $conn->query($query);
+
+if ($result) {
+    $designs = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $designMessage = "Error fetching designs: " . $conn->error;
 }
